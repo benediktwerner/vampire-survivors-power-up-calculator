@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vampire Survivors Power Up Calculator</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica,
+          Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          color: #c9d1d9;
+          background-color: black;
+        }
+        a {
+          color: #58a6ff;
+        }
+      }
+      h1 {
+        margin: 0;
+      }
+      h2 {
+        margin: 0.5em 0;
+      }
+      main {
+        display: flex;
+      }
+      .explanation {
+        margin: 0.5em 0;
+      }
+      .range-1 {
+        width: 63px;
+      }
+      .range-2 {
+        width: 109px;
+      }
+      .range-3 {
+        width: 156px;
+      }
+      .range-5 {
+        width: 250px;
+      }
+      .input table {
+        height: min-content;
+      }
+      td.img {
+        position: relative;
+        width: 48px;
+        height: 48px;
+      }
+      td.num {
+        width: 48px;
+        text-align: center;
+      }
+      td.num-wide {
+        width: 96px;
+        text-align: center;
+      }
+      .icon,
+      .icon-bg {
+        image-rendering: pixelated;
+      }
+      .icon-bg {
+        width: 48px;
+        height: 48px;
+      }
+      .icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -60%) scale(2);
+      }
+      .result {
+        margin-left: 70px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>
+      Vampire Survivors Power Up Calculator
+      <button onclick="selectAll()">Select all</button>
+      <button onclick="selectNone()">Unselect all</button>
+    </h1>
+
+    <main>
+      <div class="input">
+        <div class="explanation">
+          <small>
+            Last updated: 31st January 2022 for game version 0.2.10c &mdash;
+            <a
+              href="https://github.com/benediktwerner/vampire-survivors-power-up-calculator"
+            >
+              Source
+            </a>
+            <br />
+            Cost increases by 10% for every upgrade level bought
+          </small>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th colspan="2">Power Up</th>
+              <th>Cost</th>
+              <th colspan="2">Amount</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="result">
+        <h2>Total cost: 0</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th colspan="2">Power Up</th>
+              <th>Amount</th>
+              <th>Cost</th>
+              <th>Total cost</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </main>
+
+    <datalist id="tickmarks-1">
+      <option value="0"></option>
+      <option value="1"></option>
+    </datalist>
+    <datalist id="tickmarks-2">
+      <option value="0"></option>
+      <option value="1"></option>
+      <option value="2"></option>
+    </datalist>
+    <datalist id="tickmarks-3">
+      <option value="0"></option>
+      <option value="1"></option>
+      <option value="2"></option>
+      <option value="3"></option>
+    </datalist>
+    <datalist id="tickmarks-5">
+      <option value="0"></option>
+      <option value="1"></option>
+      <option value="2"></option>
+      <option value="3"></option>
+      <option value="4"></option>
+      <option value="5"></option>
+    </datalist>
+
+    <script>
+      // cost, max rank
+      const DATA = {
+        Might: [200, 5],
+        Armor: [600, 3],
+        'Max Health': [200, 3],
+        Recovery: [200, 5],
+        Cooldown: [900, 2],
+        Area: [300, 2],
+        Speed: [300, 2],
+        Duration: [300, 2],
+        Amount: [5000, 1],
+        MoveSpeed: [300, 5],
+        Magnet: [300, 2],
+        Luck: [600, 2],
+        Growth: [900, 3],
+        Greed: [200, 5],
+      };
+
+      const $ = (e) => document.querySelector(e);
+      const $$ = (e) => document.querySelectorAll(e);
+      const toId = (name) => name.replace(' ', '-');
+      const fromId = (name) => name.replace('-', ' ');
+
+      const MULTIPLIER = [];
+      const MAX_AMOUNT = 5;
+
+      for (let offset = 0; offset <= MAX_AMOUNT; offset++) {
+        const row = [0];
+        let last = 0;
+        for (let amnt = 1; amnt <= MAX_AMOUNT; amnt++) {
+          last += amnt * (offset + amnt - 1);
+          row.push(last);
+        }
+        MULTIPLIER.push(row);
+      }
+
+      const orderItems = (todo) => {
+        const result = [];
+        while (todo.length > 0) {
+          todo.sort((a, b) => {
+            const aFirst =
+              MULTIPLIER[0][a[2]] * a[1] + MULTIPLIER[a[2]][b[2]] * b[1];
+            const bFirst =
+              MULTIPLIER[0][b[2]] * b[1] + MULTIPLIER[b[2]][a[2]] * a[1];
+            return bFirst - aFirst;
+          });
+          result.push(todo.pop());
+        }
+        return result;
+      };
+
+      const updateResults = () => {
+        const items = [];
+        $$('.input table tbody tr').forEach((e) => {
+          const id = e.id;
+          const cost = parseInt(e.children[2].firstChild.textContent);
+          const amnt = parseInt(e.children[3].firstChild.textContent);
+          if (amnt > 0) items.push([id, cost, amnt]);
+        });
+        let multiplier = 10;
+        let total = 0;
+        let tableHtml = '';
+        for (const [i, [id, cost, amnt]] of orderItems(items).entries()) {
+          let thisTotal = 0;
+          for (let i = 1; i <= amnt; i++) {
+            thisTotal += i * cost * multiplier;
+            multiplier += 1;
+          }
+          thisTotal /= 10;
+          total += thisTotal;
+          const name = fromId(id);
+          tableHtml += `<tr>
+                <td class="num">${i + 1}</td>
+                <td class="img"><img class="icon-bg" src="images/bg.png"><img class="icon" src="images/${name}.png"></td>
+                <td>${name}</td>
+                <td class="num-wide">${amnt}</td>
+                <td class="num">${cost}</td>
+                <td class="num-wide">${thisTotal}</td>
+            </tr>`;
+        }
+        $('.result h2').textContent = `Total cost: ${total}`;
+        $('.result table tbody').innerHTML = tableHtml;
+      };
+
+      const selectNone = () => {
+        $$('.input table tbody tr input').forEach((e) => (e.value = 0));
+        $$('.input table tbody tr').forEach(
+          (e) => (e.children[3].textContent = 0)
+        );
+        updateResults();
+      };
+
+      const selectAll = () => {
+        $$('.input table tbody tr input').forEach((e) => {
+          e.value = e.max;
+          e.parentElement.parentElement.children[3].textContent = e.max;
+        });
+        updateResults();
+      };
+
+      const inputTable = $('.input table tbody');
+      for (const [name, [cost, max]] of Object.entries(DATA).sort(
+        (a, b) => b[1][0] - a[1][0]
+      )) {
+        const el = document.createElement('tr');
+        el.id = toId(name);
+        el.innerHTML = `
+<td class="img"><img class="icon-bg" src="images/bg.png"><img class="icon" src="images/${name}.png"></td>
+<td class="num">${name}</td>
+<td class="num">${cost}</td>
+<td class="num">0</td>
+<td><input type="range" max="${max}" class="range-${max}" value="0" list="tickmarks-${max}"></td>`;
+        inputTable.append(el);
+      }
+
+      $$('td:nth-child(5)').forEach((e) =>
+        e.addEventListener('input', (e) => {
+          const row = e.target.parentElement.parentElement;
+          const value = e.target.value;
+          row.children[3].textContent = value;
+          updateResults();
+        })
+      );
+    </script>
+  </body>
+</html>
