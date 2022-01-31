@@ -253,9 +253,7 @@
       };
 
       const inputTable = $('.input table tbody');
-      for (const [name, [cost, max]] of Object.entries(DATA).sort(
-        (a, b) => b[1][0] - a[1][0]
-      )) {
+      for (const [name, [cost, max]] of Object.entries(DATA)) {
         const el = document.createElement('tr');
         el.id = toId(name);
         el.innerHTML = `
