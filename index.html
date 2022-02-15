@@ -217,6 +217,7 @@
         let multiplier = 10;
         let total = 0;
         let tableHtml = '';
+        let prevAvgCost = null;
         for (const [i, [id, cost, amnt]] of orderItems(items).entries()) {
           let thisTotal = 0;
           for (let i = 1; i <= amnt; i++) {
@@ -226,14 +227,16 @@
           thisTotal /= 10;
           total += thisTotal;
           const name = fromId(id);
+          const avgCost = cost * (amnt + 1);
           tableHtml += `<tr>
-                <td class="num">${i + 1}</td>
+                <td class="num">${avgCost === prevAvgCost ? '' : i + 1}</td>
                 <td class="img"><img class="icon-bg" src="images/bg.png"><img class="icon" src="images/${name}.png"></td>
                 <td>${name}</td>
                 <td class="num-wide">${amnt}</td>
                 <td class="num">${cost}</td>
                 <td class="num-wide">${thisTotal}</td>
             </tr>`;
+          prevAvgCost = avgCost;
         }
         $('.result h2').textContent = `Total cost: ${total}`;
         $('.result table tbody').innerHTML = tableHtml;
