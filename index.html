@@ -215,6 +215,19 @@
           const amnt = parseInt(e.children[3].firstChild.textContent);
           if (amnt > 0) items.push([id, cost, amnt]);
         });
+
+        if (items.length > 0) {
+          const params = new URLSearchParams(
+            items.map(([id, _, amnt]) => [id, amnt])
+          );
+          history.replaceState(undefined, undefined, '#' + params);
+        } else
+          history.replaceState(
+            undefined,
+            undefined,
+            window.location.pathname + window.location.search
+          );
+
         let multiplier = 10;
         let total = 0;
         let tableHtml = '';
@@ -267,8 +280,8 @@
 <td class="img"><img class="icon-bg" src="images/bg.png"><img class="icon" src="images/${name}.png"></td>
 <td class="num">${name}</td>
 <td class="num">${cost}</td>
-<td class="num">0</td>
-<td><input type="range" max="${max}" class="range-${max}" value="0" list="tickmarks-${max}"></td>`;
+<td class="num amnt-value">0</td>
+<td><input type="range" max="${max}" class="range-${max} amnt-slider" value="0" list="tickmarks-${max}"></td>`;
         inputTable.append(el);
       }
 
@@ -280,6 +293,20 @@
           updateResults();
         })
       );
+
+      if (location.hash) {
+        const params = new URLSearchParams(location.hash.substring(1));
+        for (const [id, amnt] of params.entries()) {
+          const el = document.getElementById(id);
+          if (el) {
+            for (const e of el.getElementsByClassName('amnt-value'))
+              e.textContent = amnt;
+            for (const e of el.getElementsByClassName('amnt-slider'))
+              e.value = amnt;
+          }
+        }
+        updateResults();
+      }
     </script>
   </body>
 </html>
