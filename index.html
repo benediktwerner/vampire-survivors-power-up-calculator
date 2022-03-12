@@ -89,7 +89,12 @@
       <div class="input">
         <div class="explanation">
           <small>
-            Last updated: March 10th, 2022 for game version 0.3.1 &mdash;
+            Last updated: March 12th, 2022 for game version
+            <select id="branch">
+              <option value="stable">0.3.0c (stable)</option>
+              <option value="beta">0.3.1a (beta)</option>
+            </select>
+            &mdash;
             <a
               href="https://github.com/benediktwerner/vampire-survivors-power-up-calculator"
             >
@@ -154,24 +159,46 @@
     <script>
       // cost, max rank
       const DATA = {
-        Might: [200, 5],
-        Armor: [600, 3],
-        'Max Health': [200, 3],
-        Recovery: [200, 5],
-        Cooldown: [900, 2],
-        Area: [300, 2],
-        Speed: [300, 2],
-        Duration: [300, 2],
-        Amount: [5000, 1],
-        MoveSpeed: [300, 2],
-        Magnet: [300, 2],
-        Luck: [600, 3],
-        Growth: [900, 5],
-        Greed: [200, 5],
-        Curse: [1666, 5],
-        Revival: [10000, 1],
-        Reroll: [5000, 2],
-        Skip: [1000, 2],
+        stable: {
+          Might: [200, 5],
+          Armor: [600, 3],
+          'Max Health': [200, 3],
+          Recovery: [200, 5],
+          Cooldown: [900, 2],
+          Area: [300, 2],
+          Speed: [300, 2],
+          Duration: [300, 2],
+          Amount: [5000, 1],
+          MoveSpeed: [300, 2],
+          Magnet: [300, 2],
+          Luck: [600, 3],
+          Growth: [900, 5],
+          Greed: [200, 5],
+          Curse: [1666, 5],
+          Revival: [10000, 1],
+          Reroll: [5000, 2],
+          Skip: [1000, 1],
+        },
+        beta: {
+          Might: [200, 5],
+          Armor: [600, 3],
+          'Max Health': [200, 3],
+          Recovery: [200, 5],
+          Cooldown: [900, 2],
+          Area: [300, 2],
+          Speed: [300, 2],
+          Duration: [300, 2],
+          Amount: [5000, 1],
+          MoveSpeed: [300, 2],
+          Magnet: [300, 2],
+          Luck: [600, 3],
+          Growth: [900, 5],
+          Greed: [200, 5],
+          Curse: [1666, 5],
+          Revival: [10000, 1],
+          Reroll: [5000, 2],
+          Skip: [200, 2],
+        },
       };
 
       const $ = (e) => document.querySelector(e);
@@ -220,6 +247,8 @@
           const params = new URLSearchParams(
             items.map(([id, _, amnt]) => [id, amnt])
           );
+          const branch = localStorage.getItem('branch');
+          if (branch !== 'stable') params.set('branch', branch);
           history.replaceState(undefined, undefined, '#' + params);
         } else
           history.replaceState(
@@ -272,30 +301,42 @@
         updateResults();
       };
 
-      const inputTable = $('.input table tbody');
-      for (const [name, [cost, max]] of Object.entries(DATA)) {
-        const el = document.createElement('tr');
-        el.id = toId(name);
-        el.innerHTML = `
-<td class="img"><img class="icon-bg" src="images/bg.png"><img class="icon" src="images/${name}.png"></td>
-<td class="num">${name}</td>
-<td class="num">${cost}</td>
-<td class="num amnt-value">0</td>
-<td><input type="range" max="${max}" class="range-${max} amnt-slider" value="0" list="tickmarks-${max}"></td>`;
-        inputTable.append(el);
-      }
+      const render = (branch) => {
+        branch ||= localStorage.getItem('branch') || 'stable';
+        localStorage.setItem('branch', branch);
+        $('#branch').value = branch;
 
-      $$('td:nth-child(5)').forEach((e) =>
-        e.addEventListener('input', (e) => {
-          const row = e.target.parentElement.parentElement;
-          const value = e.target.value;
-          row.children[3].textContent = value;
-          updateResults();
-        })
-      );
+        const inputTable = $('.input table tbody');
+        inputTable.innerHTML = '';
+
+        for (const [name, [cost, max]] of Object.entries(DATA[branch])) {
+          const el = document.createElement('tr');
+          el.id = toId(name);
+          el.innerHTML = `
+  <td class="img"><img class="icon-bg" src="images/bg.png"><img class="icon" src="images/${name}.png"></td>
+  <td class="num">${name}</td>
+  <td class="num">${cost}</td>
+  <td class="num amnt-value">0</td>
+  <td><input type="range" max="${max}" class="range-${max} amnt-slider" value="0" list="tickmarks-${max}"></td>`;
+          inputTable.append(el);
+        }
+
+        $$('td:nth-child(5)').forEach((e) =>
+          e.addEventListener('input', (e) => {
+            const row = e.target.parentElement.parentElement;
+            const value = e.target.value;
+            row.children[3].textContent = value;
+            updateResults();
+          })
+        );
+
+        updateResults();
+      };
 
       if (location.hash) {
         const params = new URLSearchParams(location.hash.substring(1));
+        render(params.get('branch'));
+        params.delete('branch');
         for (const [id, amnt] of params.entries()) {
           const el = document.getElementById(id);
           if (el) {
@@ -305,8 +346,11 @@
               e.value = amnt;
           }
         }
-        updateResults();
+      } else {
+        render();
       }
+
+      $('#branch').addEventListener('change', (e) => render(e.target.value));
     </script>
   </body>
 </html>
