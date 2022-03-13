@@ -91,8 +91,8 @@
           <small>
             Last updated: March 12th, 2022 for game version
             <select id="branch">
-              <option value="stable">0.3.0c (stable)</option>
-              <option value="beta">0.3.1a (beta)</option>
+              <option value="previous">0.3.0c (previous)</option>
+              <option value="stable">0.3.1 (stable)</option>
             </select>
             &mdash;
             <a
@@ -159,7 +159,7 @@
     <script>
       // cost, max rank
       const DATA = {
-        stable: {
+        previous: {
           Might: [200, 5],
           Armor: [600, 3],
           'Max Health': [200, 3],
@@ -179,7 +179,7 @@
           Reroll: [5000, 2],
           Skip: [1000, 1],
         },
-        beta: {
+        stable: {
           Might: [200, 5],
           Armor: [600, 3],
           'Max Health': [200, 3],
@@ -303,6 +303,7 @@
 
       const render = (branch) => {
         branch ||= localStorage.getItem('branch') || 'stable';
+        if (!DATA[branch]) branch = 'stable';
         localStorage.setItem('branch', branch);
         $('#branch').value = branch;
 
