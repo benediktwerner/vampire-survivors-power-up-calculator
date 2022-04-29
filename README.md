@@ -1,21 +1,3 @@
-## Upgrades against original
-
-- Automatic calculation after page refresh
-
-- Next Lvl Cost - How much will you need to spend to get next level at lowest price
-
-- Powerup prices are rounded (Game does this also)
-
-- Potential Optimalization When Computing Prices (?) (More Optimalizations can be done btw)
-
-- Comments and index.html split, added for readability
-
-- Old Versions Retained for support
-
-- Moved Data To New file and made it easy to add new version
-
-- Version Names Changed to `v42`, `v50`, `v51` etc. for future compatibility
-
 ## How to Add New Game Version Prices Support
 
 1. Go To `data.js`
