@@ -19,6 +19,7 @@
 1. Go To `data.js`
 2. Duplicate Old Version Data then edit it to suit new game version (`name` property is for option name)
 4. Update `latest_data_version` (at the top)
+5. Update `latest_update_date` (at the top)
 
 ## How to update icons
 

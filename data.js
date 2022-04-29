@@ -1,5 +1,6 @@
 
 const latest_data_version="v51"
+const latest_update_date="April 29th, 2022"
 // cost, max rank
 const DATA = {
     v42: {
@@ -71,6 +72,7 @@ const DATA = {
 };
 
 //Code Below Creates Options from data above
+//And Sets Update Time
 
 const toId = (name) => name.replace(' ', '-');
 
@@ -83,3 +85,7 @@ for (const [name, data] of Object.entries(DATA)) {
 
 
 }
+
+const date = document.getElementById('update_date');
+
+date.innerHTML=latest_update_date;
