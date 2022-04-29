@@ -1,74 +1,9 @@
-// cost, max rank
-var DATA = {
-    previous: {
-        Might: [200, 5],
-        Armor: [600, 3],
-        'Max Health': [200, 3],
-        Recovery: [200, 5],
-        Cooldown: [900, 2],
-        Area: [300, 2],
-        Speed: [300, 2],
-        Duration: [300, 2],
-        Amount: [5000, 1],
-        MoveSpeed: [300, 2],
-        Magnet: [300, 2],
-        Luck: [600, 3],
-        Growth: [900, 5],
-        Greed: [200, 5],
-        Curse: [1666, 5],
-        Revival: [10000, 1],
-        Reroll: [5000, 3],
-        Skip: [200, 2],
-        Banish: [200, 2],
-    },
-    stable: {
-        Might: [200, 5],
-        Armor: [600, 3],
-        'Max Health': [200, 3],
-        Recovery: [200, 5],
-        Cooldown: [900, 2],
-        Area: [300, 2],
-        Speed: [300, 2],
-        Duration: [300, 2],
-        Amount: [5000, 1],
-        MoveSpeed: [300, 2],
-        Magnet: [300, 2],
-        Luck: [600, 3],
-        Growth: [900, 5],
-        Greed: [200, 5],
-        Curse: [1666, 5],
-        Revival: [10000, 1],
-        Reroll: [5000, 3],
-        Skip: [200, 2],
-        Banish: [200, 3],
-    },
-    beta51: {
-        Might: [200, 5],
-        Armor: [600, 3],
-        'Max Health': [200, 3],
-        Recovery: [200, 5],
-        Cooldown: [900, 2],
-        Area: [300, 2],
-        Speed: [300, 2],
-        Duration: [300, 2],
-        Amount: [5000, 1],
-        MoveSpeed: [300, 2],
-        Magnet: [300, 2],
-        Luck: [600, 3],
-        Growth: [900, 5],
-        Greed: [200, 5],
-        Curse: [1666, 5],
-        Revival: [10000, 1],
-        Reroll: [1000, 4],
-        Skip: [100, 3],
-        Banish: [100, 3],
-    },
-};
+
 
 const $ = (e) => document.querySelector(e);
 const $$ = (e) => document.querySelectorAll(e);
-const toId = (name) => name.replace(' ', '-');
 const fromId = (name) => name.replace('-', ' ');
+//toId Function was moved to `data.js`
 
 const MULTIPLIER = [];
 const MAX_AMOUNT = 5;
@@ -82,7 +17,7 @@ for (let offset = 0; offset <= MAX_AMOUNT; offset++) {
     }
     MULTIPLIER.push(row);
 }
-
+//Calculates and returns cheapest order (?)
 const orderItems = (todo) => {
     const result = [];
     while (todo.length > 0) {
@@ -168,7 +103,8 @@ const updateResults = () => {
         const params = new URLSearchParams(
             items.map(([id, _, amnt]) => [id, amnt])
         );
-        if (branch !== 'stable') params.set('branch', branch);
+        //Save All Version names in link, for ease of update and compatibility
+        params.set('branch', branch);
         history.replaceState(undefined, undefined, '#' + params);
     } else
         history.replaceState(
@@ -227,8 +163,8 @@ const selectAll = () => {
 
 const render = (branch) => {
     //Set branch if undefined
-    branch ||= localStorage.getItem('branch') || 'stable';
-    if (!DATA[branch]) branch = 'stable';
+    branch ||= localStorage.getItem('branch') || latest_data_version;
+    if (!DATA[branch]) branch = latest_data_version;
     localStorage.setItem('branch', branch);
     $('#branch').value = branch;
 
@@ -237,6 +173,10 @@ const render = (branch) => {
 
     //Create Items from data
     for (const [name, [cost, max]] of Object.entries(DATA[branch])) {
+        //Table Element with name `name` is used for User Readable Name
+        if (name=="name"){
+            continue;
+        }
         const el = document.createElement('tr');
         el.id = toId(name);
 

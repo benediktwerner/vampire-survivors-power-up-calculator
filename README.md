@@ -10,11 +10,15 @@
 
 - Comments and index.html split, added for readability
 
-- (TODO) Move Data To New file, and make it easy to add new version
+- Old Versions Retained for support
 
-## Add New Game Version Support
+- Move Data To New file, and make it easy to add new version
 
-(TODO)
+## How to Add New Game Version Prices Support
+
+1. Go To `data.js`
+2. Copy Old Version Data and edit it to suit new game version (`name` property is for option name)
+4. Update `latest_data_version` (at the top)
 
 ## How to update icons
 
