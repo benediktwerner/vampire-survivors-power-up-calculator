@@ -36,28 +36,54 @@ const orderItems = (todo) => {
   return result;
 };
 
+const computeTotalCost = (items) => {
+  let total = 0;
+  let multiplier = 10;
+  for (const [_id, cost, amnt] of orderItems(items)) {
+    for (let i = 0; i <= amnt; i++) {
+      total += i * cost * multiplier;
+      multiplier += 1;
+    }
+  }
+  return total;
+};
+
 const updateResults = () => {
   const version = branchToVersion(localStorage.getItem('branch'));
-  const currMultiplier = [...$$('.input table tbody tr .amnt-value')].reduce(
-    (acc, e) => acc + parseInt(e.textContent),
-    10
-  );
-
   const items = [];
 
   $$('.input table tbody tr').forEach((e) => {
     const id = e.id;
     const cost = parseInt(e.querySelector('.base-cost').textContent);
     const amnt = parseInt(e.querySelector('.amnt-value').textContent);
-    const maxAmnt = DATA[version][fromId(id)][1];
-    e.querySelector('.nxt-cost').textContent =
-      amnt === maxAmnt ? '' : (cost * (amnt + 1) * currMultiplier) / 10;
-
     if (amnt > 0) items.push([id, cost, amnt]);
   });
 
+  const totalCost = computeTotalCost(items);
+
+  $$('.input table tbody tr').forEach((e) => {
+    const id = e.id;
+    const cost = parseInt(e.querySelector('.base-cost').textContent);
+    const amnt = parseInt(e.querySelector('.amnt-value').textContent);
+    const maxAmnt = DATA[version][fromId(id)][1];
+    if (amnt === maxAmnt) e.querySelector('.nxt-cost').textContent = '';
+    else {
+      const newItems = [];
+      let found = false;
+      for (const item of items) {
+        if (item[0] === id) {
+          item[2] += 1;
+          found = true;
+        }
+        newItems.push(item);
+      }
+      if (!found) newItems.push([id, cost, 1]);
+      e.querySelector('.nxt-cost').textContent =
+        computeTotalCost(newItems) - totalCost;
+    }
+  });
+
   let multiplier = 10;
-  let total = 0;
   let tableHtml = '';
   let prevAvgCost = null;
   for (const [i, [id, cost, amnt]] of orderItems(items).entries()) {
@@ -66,8 +92,6 @@ const updateResults = () => {
       thisTotal += i * cost * multiplier;
       multiplier += 1;
     }
-    thisTotal /= 10;
-    total += thisTotal;
     const name = fromId(id);
     const avgCost = cost * (amnt + 1);
     tableHtml += `<tr>
@@ -76,11 +100,11 @@ const updateResults = () => {
             <td>${name}</td>
             <td class="num-wide">${amnt}</td>
             <td class="num">${cost}</td>
-            <td class="num-wide">${thisTotal}</td>
+            <td class="num-wide">${thisTotal / 10}</td>
         </tr>`;
     prevAvgCost = avgCost;
   }
-  $('.result h2').textContent = `Total cost: ${total}`;
+  $('.result h2').textContent = `Total cost: ${totalCost}`;
   $('.result table tbody').innerHTML = tableHtml;
 };
 
