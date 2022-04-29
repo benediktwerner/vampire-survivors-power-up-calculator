@@ -1,9 +1,8 @@
-## How to Add New Game Version Prices Support
+## How to add a new game version
 
-1. Go To `data.js`
-2. Duplicate Old Version Data then edit it to suit new game version (`name` property is for option name)
-4. Update `latest_data_version` variable (at the top)
-5. Update `latest_update_date` variable (at the top)
+1. Open `data.js`
+2. Duplicate the latest version and update it with the new values
+3. Update `CURRENT_STABLE_VERSION`, `CURRENT_BETA_VERSION`, and `LAST_UPDATE_DATE` variables at the top of the file appropriately.
 
 ## How to update icons
 

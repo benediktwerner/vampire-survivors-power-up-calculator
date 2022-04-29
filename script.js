@@ -1,137 +1,76 @@
-
-
 const $ = (e) => document.querySelector(e);
 const $$ = (e) => document.querySelectorAll(e);
 const fromId = (name) => name.replace('-', ' ');
-//toId Function was moved to `data.js`
+const toId = (name) => name.replace(' ', '-');
 
 const MULTIPLIER = [];
 const MAX_AMOUNT = 5;
 
 for (let offset = 0; offset <= MAX_AMOUNT; offset++) {
-    const row = [0];
-    let last = 0;
-    for (let amnt = 1; amnt <= MAX_AMOUNT; amnt++) {
-        last += amnt * (offset + amnt - 1);
-        row.push(last);
-    }
-    MULTIPLIER.push(row);
+  const row = [0];
+  let last = 0;
+  for (let amnt = 1; amnt <= MAX_AMOUNT; amnt++) {
+    last += amnt * (offset + amnt - 1);
+    row.push(last);
+  }
+  MULTIPLIER.push(row);
 }
-//Calculates and returns cheapest order (?)
-const orderItems = (todo) => {
-    const result = [];
-    while (todo.length > 0) {
-        todo.sort((a, b) => {
-            const aFirst =
-                MULTIPLIER[0][a[2]] * a[1] + MULTIPLIER[a[2]][b[2]] * b[1];
-            const bFirst =
-                MULTIPLIER[0][b[2]] * b[1] + MULTIPLIER[b[2]][a[2]] * a[1];
-            return bFirst - aFirst;
-        });
-        result.push(todo.pop());
-    }
-    return result;
+
+const branchToVersion = (branch) => {
+  if (branch === 'stable') return CURRENT_STABLE_VERSION;
+  if (branch === 'beta') return CURRENT_BETA_VERSION;
+  return branch;
 };
 
-const computeTotalCost = (items) => {
-
-
-    let total = 0;
-    //Shouldn't this be faster than starting at 10 doing division (/= 10) for every item?
-    let multiplier = 1;
-    //Can't Remove id since it is used in orderItems function
-    for (const [id, cost, amnt] of orderItems(items)) {
-        let thisTotal = 0;
-        for (let i = 1; i <= amnt; i++) {
-            //Costs of items in game (at the 0.5.1 patch and 0.5.0) are rounded
-            thisTotal += Math.round(i * cost * multiplier);
-            //Shouldn't this be faster than starting at 10 doing division (/= 10) for every item?
-            multiplier += 0.1;
-        }
-        total += thisTotal;
-    }
-
-    return total;
-}
-//Can Be Optimalized (With Function Above)
-const checkNextLvlPrice = (item_id) => {
-    //Create Two Lists
-    //Powerup Costs before potential upgrade
-    const itemsBefore = [];
-    //Powerup Costs after potential upgrade
-    const itemsAfter = [];
-    $$('.input table tbody tr').forEach((e) => {
-        const id = e.id;
-        const cost = parseInt(e.children[2].firstChild.textContent);
-        const amnt = parseInt(e.children[4].firstChild.textContent);
-        if (id == item_id) {
-            if (amnt > 0) itemsBefore.push([id, cost, amnt])
-            itemsAfter.push([id, cost, amnt + 1]);
-        } else {
-            if (amnt > 0) {
-                itemsBefore.push([id, cost, amnt]);
-                itemsAfter.push([id, cost, amnt]);
-            }
-        }
-
+// Compute cheapest order
+const orderItems = (todo) => {
+  const result = [];
+  while (todo.length > 0) {
+    todo.sort((a, b) => {
+      const aFirst = MULTIPLIER[0][a[2]] * a[1] + MULTIPLIER[a[2]][b[2]] * b[1];
+      const bFirst = MULTIPLIER[0][b[2]] * b[1] + MULTIPLIER[b[2]][a[2]] * a[1];
+      return bFirst - aFirst;
     });
-    return computeTotalCost(itemsAfter) - computeTotalCost(itemsBefore);
-
-}
+    result.push(todo.pop());
+  }
+  return result;
+};
 
 const updateResults = () => {
-    const items = [];
-    const branch = localStorage.getItem('branch');
-    $$('.input table tbody tr').forEach((e) => {
-        const id = e.id;
-        const cost = parseInt(e.children[2].firstChild.textContent);
-        const amnt = parseInt(e.children[4].firstChild.textContent);
-        //Check Should Next Lvl Cost Be Computed
-        const in_table_id = fromId(id);
-        const max_lvl = DATA[branch][in_table_id][1];
-        if (amnt != max_lvl) {
-            e.children[3].firstChild.textContent = checkNextLvlPrice(id);
-        } else {
-            e.children[3].firstChild.textContent = "";
-        }
+  const version = branchToVersion(localStorage.getItem('branch'));
+  const currMultiplier = [...$$('.input table tbody tr .amnt-value')].reduce(
+    (acc, e) => acc + parseInt(e.textContent),
+    10
+  );
 
-        //At item to computation if any bought
-        if (amnt > 0) items.push([id, cost, amnt]);
-    });
-    //Replace # Value In Link (?)
-    if (items.length > 0) {
-        const params = new URLSearchParams(
-            items.map(([id, _, amnt]) => [id, amnt])
-        );
-        //Save All Version names in link, for ease of update and compatibility
-        params.set('branch', branch);
-        history.replaceState(undefined, undefined, '#' + params);
-    } else
-        history.replaceState(
-            undefined,
-            undefined,
-            window.location.pathname + window.location.search
-        );
+  const items = [];
 
-    //Shouldn't this be faster than starting at 10 doing division (/= 10) for every item?
-    let multiplier = 1;
-    let total = 0;
-    let tableHtml = '';
-    let prevAvgCost = null;
-    for (const [i, [id, cost, amnt]] of orderItems(items).entries()) {
-        let thisTotal = 0;
-        for (let i = 1; i <= amnt; i++) {
-            //Costs of items in game (at the 0.5.1 patch and 0.5.0) are rounded
-            thisTotal += Math.round(i * cost * multiplier);
-            //Shouldn't this be faster than starting at 10 doing division (/= 10) for every item?
-            multiplier += 0.1;
-        }
-        total += thisTotal;
-        //Create Table Element
-        const name = fromId(id);
-        //Needed To check is avgCost the same as the item before
-        const avgCost = cost * (amnt + 1);
-        tableHtml += `<tr>
+  $$('.input table tbody tr').forEach((e) => {
+    const id = e.id;
+    const cost = parseInt(e.querySelector('.base-cost').textContent);
+    const amnt = parseInt(e.querySelector('.amnt-value').textContent);
+    const maxAmnt = DATA[version][fromId(id)][1];
+    e.querySelector('.nxt-cost').textContent =
+      amnt === maxAmnt ? '' : (cost * (amnt + 1) * currMultiplier) / 10;
+
+    if (amnt > 0) items.push([id, cost, amnt]);
+  });
+
+  let multiplier = 10;
+  let total = 0;
+  let tableHtml = '';
+  let prevAvgCost = null;
+  for (const [i, [id, cost, amnt]] of orderItems(items).entries()) {
+    let thisTotal = 0;
+    for (let i = 1; i <= amnt; i++) {
+      thisTotal += i * cost * multiplier;
+      multiplier += 1;
+    }
+    thisTotal /= 10;
+    total += thisTotal;
+    const name = fromId(id);
+    const avgCost = cost * (amnt + 1);
+    tableHtml += `<tr>
             <td class="num">${avgCost === prevAvgCost ? '' : i + 1}</td>
             <td class="img"><img class="icon-bg" src="images/bg.png"><img class="icon" src="images/${name}.png"></td>
             <td>${name}</td>
@@ -139,89 +78,121 @@ const updateResults = () => {
             <td class="num">${cost}</td>
             <td class="num-wide">${thisTotal}</td>
         </tr>`;
-        prevAvgCost = avgCost;
-    }
-    $('.result h2').textContent = `Total cost: ${total}`;
-    $('.result table tbody').innerHTML = tableHtml;
+    prevAvgCost = avgCost;
+  }
+  $('.result h2').textContent = `Total cost: ${total}`;
+  $('.result table tbody').innerHTML = tableHtml;
 };
 
 const selectNone = () => {
-    $$('.input table tbody tr input').forEach((e) => (e.value = 0));
-    $$('.input table tbody tr').forEach(
-        (e) => (e.children[4].textContent = 0)
-    );
-    updateResults();
+  $$('.input table tbody tr .amnt-slider').forEach((e) => (e.value = 0));
+  $$('.input table tbody tr .amnt-value').forEach((e) => (e.textContent = 0));
+  updateResults();
 };
 
 const selectAll = () => {
-    $$('.input table tbody tr input').forEach((e) => {
-        e.value = e.max;
-        e.parentElement.parentElement.children[4].textContent = e.max;
-    });
-    updateResults();
+  $$('.input table tbody tr .amnt-slider').forEach((e) => {
+    e.value = e.max;
+    e.parentElement.parentElement.querySelector('.amnt-value').textContent =
+      e.max;
+  });
+  updateResults();
+};
+
+const copyPermalink = (event) => {
+  const params = new URLSearchParams();
+  params.set(
+    'branch',
+    branchToVersion(localStorage.getItem('branch') || 'stable')
+  );
+  $$('.input table tbody tr').forEach((e) => {
+    const id = e.id;
+    const amnt = parseInt(e.querySelector('.amnt-value').textContent);
+    if (amnt > 0) params.set(id, amnt);
+  });
+
+  const url = new URL(location.href);
+  url.hash = params;
+  navigator.clipboard.writeText(url.toString()).then(() => {
+    const origText = event.target.textContent;
+    event.target.textContent = 'Copied!';
+    setTimeout(() => (event.target.textContent = origText), 1500);
+  });
 };
 
 const render = (branch) => {
-    //Set branch if undefined
-    branch ||= localStorage.getItem('branch') || latest_data_version;
-    if (!DATA[branch]) branch = latest_data_version;
-    localStorage.setItem('branch', branch);
-    $('#branch').value = branch;
+  branch ||= localStorage.getItem('branch') || 'stable';
+  if (!DATA[branchToVersion(branch)]) branch = 'stable';
+  localStorage.setItem('branch', branch);
+  $('#branch').value = branch;
+  const version = branchToVersion(branch);
 
-    const inputTable = $('.input table tbody');
-    inputTable.innerHTML = '';
+  if (version === CURRENT_BETA_VERSION || version === CURRENT_STABLE_VERSION)
+    $('#old-version-warning').classList.add('hidden');
+  else $('#old-version-warning').classList.remove('hidden');
 
-    //Create Items from data
-    for (const [name, [cost, max]] of Object.entries(DATA[branch])) {
-        //Table Element with name `name` is used for User Readable Name
-        if (name=="name"){
-            continue;
-        }
-        const el = document.createElement('tr');
-        el.id = toId(name);
+  const inputTable = $('.input table tbody');
+  inputTable.innerHTML = '';
 
+  for (const [name, [cost, max]] of Object.entries(DATA[version])) {
+    const el = document.createElement('tr');
+    el.id = toId(name);
 
-        el.innerHTML = `
+    el.innerHTML = `
 <td class="img"><img class="icon-bg" src="images/bg.png"><img class="icon" src="images/${name}.png"></td>
 <td class="num">${name}</td>
-<td class="num">${cost}</td>
-<td class="num">${cost}</td>
+<td class="num base-cost">${cost}</td>
+<td class="num nxt-cost">${cost}</td>
 <td class="num amnt-value">0</td>
 <td><input type="range" max="${max}" class="range-${max} amnt-slider" value="0" list="tickmarks-${max}"></td>`;
 
+    inputTable.append(el);
+  }
 
-        inputTable.append(el);
-    }
+  // handle slider change events
+  $$('td .amnt-slider').forEach((e) =>
+    e.addEventListener('input', (e) => {
+      const row = e.target.parentElement.parentElement;
+      const value = e.target.value;
+      row.querySelector('.amnt-value').textContent = value;
+      updateResults();
+    })
+  );
 
-    //Add Event For Sliders
-    $$('td:nth-child(6)').forEach((e) =>
-        e.addEventListener('input', (e) => {
-            const row = e.target.parentElement.parentElement;
-            const value = e.target.value;
-            row.children[4].textContent = value;
-            updateResults();
-        })
-    );
-
-    updateResults();
+  updateResults();
 };
-//Check For # in link
-if (location.hash) {
+
+document.addEventListener('DOMContentLoaded', () => {
+  const branchSelector = $('#branch');
+  const versions = Object.keys(DATA).sort((a, b) =>
+    b.localeCompare(a, undefined, { sensitivity: 'base', numeric: true })
+  );
+  branchSelector.innerHTML = `<option value="beta">${CURRENT_BETA_VERSION} (beta)</option>`;
+  branchSelector.innerHTML += `<option value="stable">${CURRENT_STABLE_VERSION} (stable)</option>`;
+  for (const version of versions) {
+    if (version === CURRENT_BETA_VERSION || version === CURRENT_STABLE_VERSION)
+      continue;
+    branchSelector.innerHTML += `<option value="${version}">${version}</option>`;
+  }
+
+  branchSelector.addEventListener('change', (e) => render(e.target.value));
+  $('#update-date').innerText = LAST_UPDATE_DATE;
+
+  if (location.hash) {
     const params = new URLSearchParams(location.hash.substring(1));
     render(params.get('branch'));
     params.delete('branch');
     for (const [id, amnt] of params.entries()) {
-        const el = document.getElementById(id);
-        if (el) {
-            for (const e of el.getElementsByClassName('amnt-value'))
-                e.textContent = amnt;
-            for (const e of el.getElementsByClassName('amnt-slider'))
-                e.value = amnt;
-        }
+      const el = document.getElementById(id);
+      if (el) {
+        for (const e of el.getElementsByClassName('amnt-value'))
+          e.textContent = amnt;
+        for (const e of el.getElementsByClassName('amnt-slider'))
+          e.value = amnt;
+      }
     }
     updateResults();
-} else {
+  } else {
     render();
-}
-
-$('#branch').addEventListener('change', (e) => render(e.target.value));
+  }
+});

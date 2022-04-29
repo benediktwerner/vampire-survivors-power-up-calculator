@@ -1,94 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
-  
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vampire Survivors Power Up Calculator</title>
-  <link rel="stylesheet" href="style.css">
-</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vampire Survivors Power Up Calculator</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<body>
-  <h1>
-    Vampire Survivors Power Up Calculator
-    <button onclick="selectAll()">Select all</button>
-    <button onclick="selectNone()">Unselect all</button>
-  </h1>
+  <body>
+    <h1>
+      Vampire Survivors Power Up Calculator
+      <button onclick="selectAll()">Select all</button>
+      <button onclick="selectNone()">Unselect all</button>
+      <button onclick="copyPermalink(event)">
+        Copy permalink for this build
+      </button>
+    </h1>
 
-  <main>
-    <div class="input">
-      <div class="explanation">
-        <small>
-          Last updated: <empty id="update_date">April 29th, 2022</empty> for game version
-          <select id="branch">
-          </select>
-          &mdash;
-          <a href="https://github.com/benediktwerner/vampire-survivors-power-up-calculator">
-            Source
-          </a>
-          <br />
-          Cost increases by 10% for every upgrade level bought
-          <br />
-          Next Lvl Cost - Lowest price for next power up level
-        </small>
+    <main>
+      <div class="input">
+        <div class="explanation">
+          <small>
+            Last updated: <span id="update-date"></span> for game version
+            <select id="branch"></select>
+            &mdash;
+            <a
+              href="https://github.com/benediktwerner/vampire-survivors-power-up-calculator"
+            >
+              Source
+            </a>
+            <br />
+            Cost increases by 10% for every upgrade level bought
+            <br />
+            <b id="old-version-warning" class="hidden">
+              The selected game version is outdated!
+            </b>
+          </small>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th colspan="2">Power Up</th>
+              <th>Base Cost</th>
+              <th>Next Lvl Cost</th>
+              <th colspan="2">Amount</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th colspan="2">Power Up</th>
-            <th>Basic Cost</th>
-            <th>Next Lvl Cost</th>
-            <th colspan="2">Amount</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    <div class="result">
-      <h2>Total cost: 0</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Order</th>
-            <th colspan="2">Power Up</th>
-            <th>Amount</th>
-            <th>Cost</th>
-            <th>Total cost</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </main>
+      <div class="result">
+        <h2>Total cost: 0</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th colspan="2">Power Up</th>
+              <th>Amount</th>
+              <th>Cost</th>
+              <th>Total cost</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </main>
 
-  <datalist id="tickmarks-1">
-    <option value="0"></option>
-    <option value="1"></option>
-  </datalist>
-  <datalist id="tickmarks-2">
-    <option value="0"></option>
-    <option value="1"></option>
-    <option value="2"></option>
-  </datalist>
-  <datalist id="tickmarks-3">
-    <option value="0"></option>
-    <option value="1"></option>
-    <option value="2"></option>
-    <option value="3"></option>
-  </datalist>
-  <datalist id="tickmarks-5">
-    <option value="0"></option>
-    <option value="1"></option>
-    <option value="2"></option>
-    <option value="3"></option>
-    <option value="4"></option>
-    <option value="5"></option>
-  </datalist>
+    <datalist id="tickmarks-1">
+      <option value="0"></option>
+      <option value="1"></option>
+    </datalist>
+    <datalist id="tickmarks-2">
+      <option value="0"></option>
+      <option value="1"></option>
+      <option value="2"></option>
+    </datalist>
+    <datalist id="tickmarks-3">
+      <option value="0"></option>
+      <option value="1"></option>
+      <option value="2"></option>
+      <option value="3"></option>
+    </datalist>
+    <datalist id="tickmarks-5">
+      <option value="0"></option>
+      <option value="1"></option>
+      <option value="2"></option>
+      <option value="3"></option>
+      <option value="4"></option>
+      <option value="5"></option>
+    </datalist>
 
-  <script type="text/javascript" src="data.js"></script>
-  <script type="text/javascript" src="script.js"></script>
-</body>
-
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+  </body>
 </html>
-
