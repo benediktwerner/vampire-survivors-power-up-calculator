@@ -23,7 +23,8 @@ const branchToVersion = (branch) => {
 };
 
 // Compute cheapest order
-const orderItems = (todo) => {
+const orderItems = (items) => {
+  const todo = [...items];
   const result = [];
   while (todo.length > 0) {
     todo.sort((a, b) => {
@@ -40,12 +41,12 @@ const computeTotalCost = (items) => {
   let total = 0;
   let multiplier = 10;
   for (const [_id, cost, amnt] of orderItems(items)) {
-    for (let i = 0; i <= amnt; i++) {
+    for (let i = 1; i <= amnt; i++) {
       total += i * cost * multiplier;
       multiplier += 1;
     }
   }
-  return total;
+  return total / 10;
 };
 
 const updateResults = () => {
@@ -72,10 +73,9 @@ const updateResults = () => {
       let found = false;
       for (const item of items) {
         if (item[0] === id) {
-          item[2] += 1;
+          newItems.push([id, cost, amnt + 1]);
           found = true;
-        }
-        newItems.push(item);
+        } else newItems.push(item);
       }
       if (!found) newItems.push([id, cost, 1]);
       e.querySelector('.nxt-cost').textContent =
