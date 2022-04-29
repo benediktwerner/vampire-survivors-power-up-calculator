@@ -12,14 +12,16 @@
 
 - Old Versions Retained for support
 
-- Move Data To New file, and make it easy to add new version
+- Moved Data To New file and made it easy to add new version
+
+- Version Names Changed to `v42`, `v50`, `v51` etc. for future compatibility
 
 ## How to Add New Game Version Prices Support
 
 1. Go To `data.js`
 2. Duplicate Old Version Data then edit it to suit new game version (`name` property is for option name)
-4. Update `latest_data_version` (at the top)
-5. Update `latest_update_date` (at the top)
+4. Update `latest_data_version` variable (at the top)
+5. Update `latest_update_date` variable (at the top)
 
 ## How to update icons
 
