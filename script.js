@@ -99,6 +99,7 @@ const orderItems = (todo) => {
 };
 
 const computeTotalCost=(items)=>{
+   let total = 0;
     if (items.length > 0) {
         const params = new URLSearchParams(
             items.map(([id, _, amnt]) => [id, amnt])
@@ -112,7 +113,7 @@ const computeTotalCost=(items)=>{
         );
 
     let multiplier = 10;
-    let total = 0;
+   
     let prevAvgCost = null;
     for (const [i, [id, cost, amnt]] of orderItems(items).entries()) {
         let thisTotal = 0;
