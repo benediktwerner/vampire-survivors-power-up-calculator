@@ -1,67 +1,67 @@
 // cost, max rank
 var DATA = {
     previous: {
-        Might: [200, 5,0],
-        Armor: [600, 3,0],
-        'Max Health': [200, 3,0],
-        Recovery: [200, 5,0],
-        Cooldown: [900, 2,0],
-        Area: [300, 2,0],
-        Speed: [300, 2,0],
-        Duration: [300, 2,0],
-        Amount: [5000, 1,0],
-        MoveSpeed: [300, 2,0],
-        Magnet: [300, 2,0],
-        Luck: [600, 3,0],
-        Growth: [900, 5,0],
-        Greed: [200, 5,0],
-        Curse: [1666, 5,0],
-        Revival: [10000, 1,0],
-        Reroll: [5000, 3,0],
-        Skip: [200, 2,0],
-        Banish: [200, 2,0],
+        Might: [200, 5],
+        Armor: [600, 3],
+        'Max Health': [200, 3],
+        Recovery: [200, 5],
+        Cooldown: [900, 2],
+        Area: [300, 2],
+        Speed: [300, 2],
+        Duration: [300, 2],
+        Amount: [5000, 1],
+        MoveSpeed: [300, 2],
+        Magnet: [300, 2],
+        Luck: [600, 3],
+        Growth: [900, 5],
+        Greed: [200, 5],
+        Curse: [1666, 5],
+        Revival: [10000, 1],
+        Reroll: [5000, 3],
+        Skip: [200, 2],
+        Banish: [200, 2],
     },
     stable: {
-        Might: [200, 5,0],
-        Armor: [600, 3,0],
-        'Max Health': [200, 3,0],
-        Recovery: [200, 5,0],
-        Cooldown: [900, 2,0],
-        Area: [300, 2,0],
-        Speed: [300, 2,0],
-        Duration: [300, 2,0],
-        Amount: [5000, 1,0],
-        MoveSpeed: [300, 2,0],
-        Magnet: [300, 2,0],
-        Luck: [600, 3,0],
-        Growth: [900, 5,0],
-        Greed: [200, 5,0],
-        Curse: [1666, 5,0],
-        Revival: [10000, 1,0],
-        Reroll: [5000, 3,0],
-        Skip: [200, 2,0],
-        Banish: [200, 3,0],
+        Might: [200, 5],
+        Armor: [600, 3],
+        'Max Health': [200, 3],
+        Recovery: [200, 5],
+        Cooldown: [900, 2],
+        Area: [300, 2],
+        Speed: [300, 2],
+        Duration: [300, 2],
+        Amount: [5000, 1],
+        MoveSpeed: [300, 2],
+        Magnet: [300, 2],
+        Luck: [600, 3],
+        Growth: [900, 5],
+        Greed: [200, 5],
+        Curse: [1666, 5],
+        Revival: [10000, 1],
+        Reroll: [5000, 3],
+        Skip: [200, 2],
+        Banish: [200, 3],
     },
     beta51: {
-        Might: [200, 5,0],
-        Armor: [600, 3,0],
-        'Max Health': [200, 3,0],
-        Recovery: [200, 5,0],
-        Cooldown: [900, 2,0],
-        Area: [300, 2,0],
-        Speed: [300, 2,0],
-        Duration: [300, 2,0],
-        Amount: [5000, 1,0],
-        MoveSpeed: [300, 2,0],
-        Magnet: [300, 2,0],
-        Luck: [600, 3,0],
-        Growth: [900, 5,0],
-        Greed: [200, 5,0],
-        Curse: [1666, 5,0],
-        Revival: [10000, 1,0],
-        Reroll: [1000, 4,0],
-        Skip: [100, 3,0],
-        Banish: [100, 3,0],
+        Might: [200, 5],
+        Armor: [600, 3],
+        'Max Health': [200, 3],
+        Recovery: [200, 5],
+        Cooldown: [900, 2],
+        Area: [300, 2],
+        Speed: [300, 2],
+        Duration: [300, 2],
+        Amount: [5000, 1],
+        MoveSpeed: [300, 2],
+        Magnet: [300, 2],
+        Luck: [600, 3],
+        Growth: [900, 5],
+        Greed: [200, 5],
+        Curse: [1666, 5],
+        Revival: [10000, 1],
+        Reroll: [1000, 4],
+        Skip: [100, 3],
+        Banish: [100, 3],
     },
 };
 
@@ -98,58 +98,50 @@ const orderItems = (todo) => {
     return result;
 };
 
-const computeTotalCost=(items)=>{
-   let total = 0;
-    if (items.length > 0) {
-        const params = new URLSearchParams(
-            items.map(([id, _, amnt]) => [id, amnt])
-        );
-        history.replaceState(undefined, undefined, '#' + params);
-    } else
-        history.replaceState(
-            undefined,
-            undefined,
-            window.location.pathname + window.location.search
-        );
+const computeTotalCost = (items) => {
 
-    let multiplier = 10;
-   
-    let prevAvgCost = null;
-    for (const [i, [id, cost, amnt]] of orderItems(items).entries()) {
+
+    let total = 0;
+    //Shouldn't this be faster than starting at 10 doing division (/= 10) for every item?
+    let multiplier = 1;
+    //Can't Remove id since it is used in orderItems function
+    for (const [id, cost, amnt] of orderItems(items)) {
         let thisTotal = 0;
         for (let i = 1; i <= amnt; i++) {
-            thisTotal += i * cost * multiplier;
-            multiplier += 1;
+            //Costs of items in game (at the 0.5.1 patch and 0.5.0) are rounded
+            thisTotal += Math.round(i * cost * multiplier);
+            //Shouldn't this be faster than starting at 10 doing division (/= 10) for every item?
+            multiplier += 0.1;
         }
-        thisTotal /= 10;
         total += thisTotal;
-        const avgCost = cost * (amnt + 1);
-        prevAvgCost = avgCost;
     }
 
     return total;
 }
-
-const checkNextLvlPrice=(item_id)=>{
+//Can Be Optimalized (With Function Above)
+const checkNextLvlPrice = (item_id) => {
+    //Create Two Lists
+    //Powerup Costs before potential upgrade
     const itemsBefore = [];
+    //Powerup Costs after potential upgrade
     const itemsAfter = [];
     $$('.input table tbody tr').forEach((e) => {
         const id = e.id;
         const cost = parseInt(e.children[2].firstChild.textContent);
         const amnt = parseInt(e.children[4].firstChild.textContent);
-        if(id==item_id){
+        if (id == item_id) {
             if (amnt > 0) itemsBefore.push([id, cost, amnt])
-            itemsAfter.push([id, cost, amnt+1]);
-        }else{
+            itemsAfter.push([id, cost, amnt + 1]);
+        } else {
             if (amnt > 0) {
                 itemsBefore.push([id, cost, amnt]);
                 itemsAfter.push([id, cost, amnt]);
             }
         }
-        
+
     });
-    return computeTotalCost(itemsAfter)-computeTotalCost(itemsBefore);
-    
+    return computeTotalCost(itemsAfter) - computeTotalCost(itemsBefore);
+
 }
 
 const updateResults = () => {
@@ -160,16 +152,18 @@ const updateResults = () => {
         const cost = parseInt(e.children[2].firstChild.textContent);
         const amnt = parseInt(e.children[4].firstChild.textContent);
         //Check Should Next Lvl Cost Be Computed
-        const in_table_id=fromId(id);
-        const max_lvl=branch[in_table_id][1];
-        if (amnt!=max_lvl){
-            e.children[3].firstChild.textContent=checkNextLvlPrice(id);
-        }else{
-            e.children[3].firstChild.textContent="";
+        const in_table_id = fromId(id);
+        const max_lvl = DATA[branch][in_table_id][1];
+        if (amnt != max_lvl) {
+            e.children[3].firstChild.textContent = checkNextLvlPrice(id);
+        } else {
+            e.children[3].firstChild.textContent = "";
         }
+
+        //At item to computation if any bought
         if (amnt > 0) items.push([id, cost, amnt]);
     });
-
+    //Replace # Value In Link (?)
     if (items.length > 0) {
         const params = new URLSearchParams(
             items.map(([id, _, amnt]) => [id, amnt])
@@ -183,19 +177,23 @@ const updateResults = () => {
             window.location.pathname + window.location.search
         );
 
-    let multiplier = 10;
+    //Shouldn't this be faster than starting at 10 doing division (/= 10) for every item?
+    let multiplier = 1;
     let total = 0;
     let tableHtml = '';
     let prevAvgCost = null;
     for (const [i, [id, cost, amnt]] of orderItems(items).entries()) {
         let thisTotal = 0;
         for (let i = 1; i <= amnt; i++) {
-            thisTotal += i * cost * multiplier;
-            multiplier += 1;
+            //Costs of items in game (at the 0.5.1 patch and 0.5.0) are rounded
+            thisTotal += Math.round(i * cost * multiplier);
+            //Shouldn't this be faster than starting at 10 doing division (/= 10) for every item?
+            multiplier += 0.1;
         }
-        thisTotal /= 10;
         total += thisTotal;
+        //Create Table Element
         const name = fromId(id);
+        //Needed To check is avgCost the same as the item before
         const avgCost = cost * (amnt + 1);
         tableHtml += `<tr>
             <td class="num">${avgCost === prevAvgCost ? '' : i + 1}</td>
@@ -228,6 +226,7 @@ const selectAll = () => {
 };
 
 const render = (branch) => {
+    //Set branch if undefined
     branch ||= localStorage.getItem('branch') || 'stable';
     if (!DATA[branch]) branch = 'stable';
     localStorage.setItem('branch', branch);
@@ -236,42 +235,25 @@ const render = (branch) => {
     const inputTable = $('.input table tbody');
     inputTable.innerHTML = '';
 
-    for (const [name, [cost, max,cost_eval]] of Object.entries(DATA[branch])) {
+    //Create Items from data
+    for (const [name, [cost, max]] of Object.entries(DATA[branch])) {
         const el = document.createElement('tr');
         el.id = toId(name);
-        
-        if(cost_eval==-1){
-            //No next lvl
-            el.innerHTML = `
-<td class="img"><img class="icon-bg" src="images/bg.png"><img class="icon" src="images/${name}.png"></td>
-<td class="num">${name}</td>
-<td class="num">${cost}</td>
-<td class="num"></td>
-<td class="num amnt-value">0</td>
-<td><input type="range" max="${max}" class="range-${max} amnt-slider" value="0" list="tickmarks-${max}"></td>`;
-        }else if (cost_eval==0){
-            //Lvl = 0 or eval wasn't updated
-            el.innerHTML = `
+
+
+        el.innerHTML = `
 <td class="img"><img class="icon-bg" src="images/bg.png"><img class="icon" src="images/${name}.png"></td>
 <td class="num">${name}</td>
 <td class="num">${cost}</td>
 <td class="num">${cost}</td>
 <td class="num amnt-value">0</td>
 <td><input type="range" max="${max}" class="range-${max} amnt-slider" value="0" list="tickmarks-${max}"></td>`;
-        }else{
-            //Next lvl exists
-            el.innerHTML = `
-<td class="img"><img class="icon-bg" src="images/bg.png"><img class="icon" src="images/${name}.png"></td>
-<td class="num">${name}</td>
-<td class="num">${cost}</td>
-<td class="num">${cost_eval}</td>
-<td class="num amnt-value">0</td>
-<td><input type="range" max="${max}" class="range-${max} amnt-slider" value="0" list="tickmarks-${max}"></td>`;
-        }
-        
+
+
         inputTable.append(el);
     }
 
+    //Add Event For Sliders
     $$('td:nth-child(6)').forEach((e) =>
         e.addEventListener('input', (e) => {
             const row = e.target.parentElement.parentElement;
@@ -283,7 +265,7 @@ const render = (branch) => {
 
     updateResults();
 };
-
+//Check For # in link
 if (location.hash) {
     const params = new URLSearchParams(location.hash.substring(1));
     render(params.get('branch'));
