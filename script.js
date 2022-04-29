@@ -162,7 +162,7 @@ const updateResults = () => {
         const in_table_id=fromId(id);
         const max_lvl=branch[in_table_id][1];
         if (amnt!=max_lvl){
-            
+            e.children[3].firstChild.textContent=checkNextLvlPrice(id);
         }else{
             e.children[3].firstChild.textContent="";
         }
