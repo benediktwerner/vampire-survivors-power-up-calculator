@@ -17,7 +17,7 @@
 ## How to Add New Game Version Prices Support
 
 1. Go To `data.js`
-2. Copy Old Version Data and edit it to suit new game version (`name` property is for option name)
+2. Duplicate Old Version Data then edit it to suit new game version (`name` property is for option name)
 4. Update `latest_data_version` (at the top)
 
 ## How to update icons
