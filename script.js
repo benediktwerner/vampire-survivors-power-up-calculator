@@ -16,6 +16,8 @@ for (let offset = 0; offset <= MAX_AMOUNT; offset++) {
   MULTIPLIER.push(row);
 }
 
+const round = (num) => +num.toFixed(2);
+
 const branchToVersion = (branch) => {
   if (branch === 'stable') return CURRENT_STABLE_VERSION;
   if (branch === 'beta') return CURRENT_BETA_VERSION;
@@ -78,8 +80,9 @@ const updateResults = () => {
         } else newItems.push(item);
       }
       if (!found) newItems.push([id, cost, 1]);
-      e.querySelector('.nxt-cost').textContent =
-        computeTotalCost(newItems) - totalCost;
+      e.querySelector('.nxt-cost').textContent = round(
+        computeTotalCost(newItems) - totalCost
+      );
     }
   });
 
@@ -166,7 +169,7 @@ const render = (branch) => {
 <td class="img"><img class="icon-bg" src="images/bg.png"><img class="icon" src="images/${name}.png"></td>
 <td class="num">${name}</td>
 <td class="num base-cost">${cost}</td>
-<td class="num nxt-cost">${cost}</td>
+<td class="num-wide nxt-cost">${cost}</td>
 <td class="num amnt-value">0</td>
 <td><input type="range" max="${max}" class="range-${max} amnt-slider" value="0" list="tickmarks-${max}"></td>`;
 
