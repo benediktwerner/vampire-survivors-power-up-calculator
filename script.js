@@ -102,7 +102,7 @@ const updateResults = () => {
             <td class="img"><img class="icon-bg" src="images/bg.png"><img class="icon" src="images/${name}.png"></td>
             <td>${name}</td>
             <td class="num-wide">${amnt}</td>
-            <td class="num">${cost}</td>
+            <td class="num-wide">${cost}</td>
             <td class="num-wide">${thisTotal / 10}</td>
         </tr>`;
     prevAvgCost = avgCost;
