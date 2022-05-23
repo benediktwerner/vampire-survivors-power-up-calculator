@@ -1,5 +1,5 @@
-const CURRENT_STABLE_VERSION = '0.5.205';
-const CURRENT_BETA_VERSION = '0.6.002';
+const CURRENT_STABLE_VERSION = '0.6.103';
+const CURRENT_BETA_VERSION = '0.6.103';
 const LAST_UPDATE_DATE = 'May 23th, 2022';
 
 // cost, max rank
@@ -88,7 +88,7 @@ const DATA = {
     Skip: [100, 3],
     Banish: [100, 4],
   },
-  '0.6.002': {
+  '0.6.103': {
     Might: [200, 5],
     Armor: [600, 3],
     'Max Health': [200, 3],
