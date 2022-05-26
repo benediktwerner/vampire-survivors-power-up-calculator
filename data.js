@@ -107,6 +107,6 @@ const DATA = {
     Revival: [10000, 1],
     Reroll: [1000, 4],
     Skip: [100, 4],
-    Banish: [100, 4],
+    Banish: [100, 5],
   },
 };
