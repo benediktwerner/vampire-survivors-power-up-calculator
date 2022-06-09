@@ -83,10 +83,22 @@ td.num-wide {
   margin-left: 70px;
 }
 
+.result[data-cost-calc="old"] .hidden-when-old-calc {
+  display: none;
+}
+
+.result[data-cost-calc="new"] .hidden-when-new-calc {
+  display: none;
+}
+
 #old-version-warning {
   color: red;
 }
 
 .hidden {
   display: none;
+}
+
+.margin-left {
+  margin-left: 1em;
 }

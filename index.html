@@ -31,7 +31,7 @@
               Source
             </a>
             <br />
-            Cost increases by 10% for every upgrade level bought
+            <span id="cost-calc-explanation"></span>
             <br />
             <b id="old-version-warning" class="hidden">
               The selected game version is outdated!
@@ -50,16 +50,25 @@
           <tbody></tbody>
         </table>
       </div>
-      <div class="result">
+      <div class="result" data-cost-calc="new">
         <h2>Total cost: 0</h2>
+        <span class="hidden-when-old-calc">
+          Since v0.7 the buy order doesn't matter anymore.
+        </span>
         <table>
           <thead>
             <tr>
-              <th>Order</th>
+              <th class="hidden-when-new-calc">Order</th>
               <th colspan="2">Power Up</th>
               <th>Amount</th>
               <th>Base Cost</th>
-              <th>Total Cost</th>
+              <th>
+                Total Cost
+                <span class="hidden-when-old-calc">
+                  <br />
+                  <small>(without fees)</small>
+                </span>
+              </th>
             </tr>
           </thead>
           <tbody></tbody>

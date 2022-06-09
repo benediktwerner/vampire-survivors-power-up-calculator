@@ -18,6 +18,8 @@ for (let offset = 0; offset <= MAX_AMOUNT; offset++) {
 
 const round = (num) => +num.toFixed(2);
 
+const formatNum = (num) => num.toLocaleString('en');
+
 const branchToVersion = (branch) => {
   if (branch === 'stable') return CURRENT_STABLE_VERSION;
   if (branch === 'beta') return CURRENT_BETA_VERSION;
@@ -25,7 +27,8 @@ const branchToVersion = (branch) => {
 };
 
 // Compute cheapest order
-const orderItems = (items) => {
+const orderItems = (items, costCalc = 'old') => {
+  if (costCalc === 'new') return items;
   const todo = [...items];
   const result = [];
   while (todo.length > 0) {
@@ -39,7 +42,7 @@ const orderItems = (items) => {
   return result;
 };
 
-const computeTotalCost = (items) => {
+const computeTotalCostOld = (items) => {
   let total = 0;
   let multiplier = 10;
   for (const [_id, cost, amnt] of orderItems(items)) {
@@ -51,9 +54,23 @@ const computeTotalCost = (items) => {
   return total / 10;
 };
 
+const computeTotalCostNew = (items) => {
+  let total = 0;
+  let count = 0;
+  for (const [_id, cost, amnt] of items) {
+    for (let i = 1; i <= amnt; i++) {
+      total += i * cost;
+      if (count > 0) total += Math.floor(20 * Math.pow(1.1, count));
+      count++;
+    }
+  }
+  return total;
+};
+
 const updateResults = () => {
   const version = branchToVersion(localStorage.getItem('branch'));
   const items = [];
+  const costCalc = DATA[version].costCalc;
 
   $$('.input table tbody tr').forEach((e) => {
     const id = e.id;
@@ -62,13 +79,16 @@ const updateResults = () => {
     if (amnt > 0) items.push([id, cost, amnt]);
   });
 
+  const computeTotalCost =
+    costCalc === 'old' ? computeTotalCostOld : computeTotalCostNew;
+
   const totalCost = computeTotalCost(items);
 
   $$('.input table tbody tr').forEach((e) => {
     const id = e.id;
     const cost = parseInt(e.querySelector('.base-cost').textContent);
     const amnt = parseInt(e.querySelector('.amnt-value').textContent);
-    const maxAmnt = DATA[version][fromId(id)][1];
+    const maxAmnt = DATA[version].powerUps[fromId(id)][1];
     if (amnt === maxAmnt) e.querySelector('.nxt-cost').textContent = '';
     else {
       const newItems = [];
@@ -89,16 +109,24 @@ const updateResults = () => {
   let multiplier = 10;
   let tableHtml = '';
   let prevAvgCost = null;
-  for (const [i, [id, cost, amnt]] of orderItems(items).entries()) {
+  let totalNoFees = 0;
+  for (const [i, [id, cost, amnt]] of orderItems(items, costCalc).entries()) {
     let thisTotal = 0;
     for (let i = 1; i <= amnt; i++) {
-      thisTotal += i * cost * multiplier;
-      multiplier += 1;
+      if (costCalc === 'old') {
+        thisTotal += i * cost * multiplier;
+        multiplier += 1;
+      } else {
+        thisTotal += i * cost * 10;
+      }
     }
+    totalNoFees += thisTotal / 10;
     const name = fromId(id);
     const avgCost = cost * (amnt + 1);
     tableHtml += `<tr>
-            <td class="num">${avgCost === prevAvgCost ? '' : i + 1}</td>
+            <td class="num hidden-when-new-calc">${
+              avgCost === prevAvgCost ? '' : i + 1
+            }</td>
             <td class="img"><img class="icon-bg" src="images/bg.png"><img class="icon" src="images/${name}.png"></td>
             <td>${name}</td>
             <td class="num-wide">${amnt}</td>
@@ -107,7 +135,13 @@ const updateResults = () => {
         </tr>`;
     prevAvgCost = avgCost;
   }
-  $('.result h2').textContent = `Total cost: ${totalCost}`;
+  $('.result h2').innerHTML =
+    `Total cost: ${formatNum(totalCost)}` +
+    (costCalc === 'old' || totalCost === totalNoFees
+      ? ''
+      : ` <small class="margin-left">(${formatNum(totalNoFees)} + ${formatNum(
+          totalCost - totalNoFees
+        )} in fees)</small>`);
   $('.result table tbody').innerHTML = tableHtml;
 };
 
@@ -158,10 +192,17 @@ const render = (branch) => {
     $('#old-version-warning').classList.add('hidden');
   else $('#old-version-warning').classList.remove('hidden');
 
+  $('#cost-calc-explanation').innerHTML =
+    DATA[version].costCalc === 'old'
+      ? 'Cost increases by 10% for every upgrade level bought'
+      : 'Starting with the second upgrade, 20 * 1.1<sup>number of total upgrades bought</sup> is added to the cost';
+
+  $('.result').dataset.costCalc = DATA[version].costCalc;
+
   const inputTable = $('.input table tbody');
   inputTable.innerHTML = '';
 
-  for (const [name, [cost, max]] of Object.entries(DATA[version])) {
+  for (const [name, [cost, max]] of Object.entries(DATA[version].powerUps)) {
     const el = document.createElement('tr');
     el.id = toId(name);
 
