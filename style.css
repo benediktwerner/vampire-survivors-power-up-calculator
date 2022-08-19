@@ -1,6 +1,7 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial,
     sans-serif, Apple Color Emoji, Segoe UI Emoji;
+  color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -83,11 +84,11 @@ td.num-wide {
   margin-left: 70px;
 }
 
-.result[data-cost-calc="old"] .hidden-when-old-calc {
+.result[data-cost-calc='old'] .hidden-when-old-calc {
   display: none;
 }
 
-.result[data-cost-calc="new"] .hidden-when-new-calc {
+.result[data-cost-calc='new'] .hidden-when-new-calc {
   display: none;
 }
 
